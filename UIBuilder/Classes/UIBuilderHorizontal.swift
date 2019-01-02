@@ -21,7 +21,7 @@ public class UIBuilderHorizontal: UIBuilderElement {
     public override func build() -> UIView {
         
         // Create the container view
-        let container = UIView()
+        let container = self.view ?? UIView()
         container.layoutMargins = self.padding
         
         // If the width is defined, set it

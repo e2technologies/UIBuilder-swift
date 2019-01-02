@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'UIBuilder'
-  s.version          = '0.1.0'
+  s.version          = '0.2.0'
   s.summary          = 'An iOS swift library intended to assist with programatically building complicated UI elements.'
 
 #  s.description      = <<-DESC

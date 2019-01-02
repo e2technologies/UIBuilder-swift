@@ -8,12 +8,24 @@
 import Foundation
 
 public class UIBuilderElement {
+    var view: UIView?
     var margin: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     var padding: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     var height: CGFloat?
     var width: CGFloat?
     var verticalAlign: UIBuilderAlign.Vertical = .top
     var horizontalAlign: UIBuilderAlign.Horizontal = .left
+    
+    /**
+     Sets the view for the element
+    
+     - Parameter view: The view for the element
+     - Returns: The build element
+     **/
+    public func view(_ view: UIView) -> Self {
+        self.view = view
+        return self
+    }
     
     /**
      Sets the margin for the element

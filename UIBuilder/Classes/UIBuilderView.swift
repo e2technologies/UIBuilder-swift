@@ -8,24 +8,20 @@
 import Foundation
 
 public class UIBuilderView: UIBuilderElement {
-    var view: UIView
-    
-    init(view: UIView) {
-        self.view = view
-    }
-    
     public override func build() -> UIView {
+        let tempView = self.view ?? UIView()
+        
         // If the width is defined, set it
         if let width = self.width {
-            self.view.constrain.width(width).build()
+            tempView.constrain.width(width).build()
         }
         
         // If the height is defined, set it
         if let height = self.height {
-            self.view.constrain.height(height).build()
+            tempView.constrain.height(height).build()
         }
         
-        return self.view
+        return tempView
     }
 }
 
@@ -37,6 +33,6 @@ public extension UIView {
      - Returns: The new element object
      **/
     var element: UIBuilderElement {
-        return UIBuilderView(view: self)
+        return UIBuilderView().view(self)
     }
 }
