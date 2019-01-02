@@ -94,5 +94,6 @@ public class UIBuilderElement {
     }
     
     // Override when subclassing
+    @discardableResult
     public func build() -> UIView { return UIView() }
 }
