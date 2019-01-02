@@ -14,56 +14,41 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let margin = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        self.view.backgroundColor = UIColor.gray
         
-        var elements = [UIBuilderElement]()
+        let stripeHeight: CGFloat = 20
+ 
+        // Build the top side
+        let blueSquare = UIView()
+        blueSquare.backgroundColor = UIColor.blue
+        let blueSquareElement = blueSquare.element.height(7*stripeHeight).width(7*stripeHeight).halign(.left).valign(.top)
         
-        // Fixed
-        elements.removeAll()
-        for _ in 0..<5 {
-            let view = UIView()
-            view.backgroundColor = UIColor.red
-            elements.append(view.element.width(25).height(25).margin(margin))
-        }
-        let row1 = UIBuilder.stack(horizontal: elements).halign(.center)
-        
-        // One width stretching
-        elements.removeAll()
-        for i in 0..<3 {
-            let view = UIView()
-            view.backgroundColor = UIColor.yellow
-            if i == 1 {
-                elements.append(view.element.height(25).margin(margin))
-            }
-            else {
-                elements.append(view.element.width(25).height(25).margin(margin))
-            }
-        }
-        let row2 = UIBuilder.stack(horizontal: elements)
-        
-        // One width and all of the height stretching
-        elements.removeAll()
+        var tStripes = [UIBuilderElement]()
         for i in 0..<7 {
-            let view = UIView()
-            view.backgroundColor = UIColor.green
-            if i == 1 {
-                elements.append(view.element.height(25).margin(margin))
-            }
-            else {
-                elements.append(view.element.height(25).width(25).margin(margin))
-            }
+            let stripe = UIView()
+            stripe.backgroundColor = (i % 2) == 0 ? UIColor.red : UIColor.white
+            tStripes.append(stripe.element.height(stripeHeight))
         }
-        let row3 = UIBuilder.stack(horizontal: elements)
+
+        let topRightStripes = UIBuilder.stack(vertical: tStripes)
+        let topHStack = UIBuilder.stack(horizontal: [blueSquareElement, topRightStripes])
         
-        let tempView = UIView()
-        tempView.backgroundColor = UIColor.blue
-        let row4 = tempView.element.width(50).halign(.center).margin(margin)
+        // Build the bottom side
+        var bStripes = [UIBuilderElement]()
+        for i in 0..<7 {
+            let stripe = UIView()
+            stripe.backgroundColor = (i % 2) == 0 ? UIColor.white : UIColor.red
+            bStripes.append(stripe.element.height(stripeHeight))
+        }
+        let bottomVStack = UIBuilder.stack(vertical: bStripes)
+     
+        // Combine the top and bottom
+        let mainView = UIBuilder.stack(vertical: [topHStack, bottomVStack]).build()
         
-        // Create the view
-        let view = UIBuilder.stack(vertical: [row2, row1, row4, row3]).build()
-        
-        self.view.addSubview(view)
-        self.view.constrainInside(view, innerSpacing: 20, useMargin: false)
+        self.view.addSubview(mainView)
+        self.view.constrain.leftEdges(mainView).build()
+        self.view.constrain.rightEdges(mainView).build()
+        self.view.constrain.topEdges(mainView).build()
     }
     
     override func didReceiveMemoryWarning() {

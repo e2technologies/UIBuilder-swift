@@ -22,10 +22,7 @@ public class UIBuilderElement {
      - Parameter view: The view for the element
      - Returns: The build element
      **/
-    public func view(_ view: UIView) -> Self {
-        self.view = view
-        return self
-    }
+    public func view(_ view: UIView) -> Self { self.view = view; return self }
     
     /**
      Sets the margin for the element
@@ -33,10 +30,7 @@ public class UIBuilderElement {
      - Parameter margin: The margin for the element
      - Returns: The build element
      **/
-    public func margin(_ margin: UIEdgeInsets) -> Self {
-        self.margin = margin
-        return self
-    }
+    public func margin(_ margin: UIEdgeInsets) -> Self { self.margin = margin; return self }
     
     /**
      Sets the padding for the element
@@ -44,10 +38,7 @@ public class UIBuilderElement {
      - Parameter padding: The padding for the element
      - Returns: The build element
      **/
-    public func padding(_ padding: UIEdgeInsets) -> Self {
-        self.padding = padding
-        return self
-    }
+    public func padding(_ padding: UIEdgeInsets) -> Self { self.padding = padding; return self }
     
     /**
      Sets the height for the element
@@ -55,10 +46,7 @@ public class UIBuilderElement {
      - Parameter height: The height for the element
      - Returns: The build element
      **/
-    public func height(_ height: CGFloat) -> Self {
-        self.height = height
-        return self
-    }
+    public func height(_ height: CGFloat) -> Self { self.height = height; return self }
     
     /**
      Sets the width for the element
@@ -66,10 +54,7 @@ public class UIBuilderElement {
      - Parameter width: The width for the element
      - Returns: The build element
      **/
-    public func width(_ width: CGFloat) -> Self {
-        self.width = width
-        return self
-    }
+    public func width(_ width: CGFloat) -> Self { self.width = width; return self }
     
     /**
      Sets the vertical alignment for the element
@@ -77,10 +62,7 @@ public class UIBuilderElement {
      - Parameter align: The vertical alignment for the element
      - Returns: The build element
      **/
-    public func valign(_ align: UIBuilderAlign.Vertical) -> Self {
-        self.verticalAlign = align
-        return self
-    }
+    public func valign(_ align: UIBuilderAlign.Vertical) -> Self { self.verticalAlign = align; return self }
     
     /**
      Sets the horizontal alignment for the element
@@ -88,10 +70,7 @@ public class UIBuilderElement {
      - Parameter align: The horizontal alignment for the element
      - Returns: The build element
      **/
-    public func halign(_ align: UIBuilderAlign.Horizontal) -> Self {
-        self.horizontalAlign = align
-        return self
-    }
+    public func halign(_ align: UIBuilderAlign.Horizontal) -> Self { self.horizontalAlign = align; return self }
     
     // Override when subclassing
     @discardableResult
