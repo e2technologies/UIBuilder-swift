@@ -22,6 +22,15 @@ public class UIBuilderConstraint {
     let relationKey = "relation"
     let constantKey = "constant"
     
+    var parent: UIView { return self.params[parentKey] as! UIView }
+    var from: UIView { return self.params[fromKey] as! UIView }
+    var fromAttribute: NSLayoutConstraint.Attribute { return self.params[fromAttrKey] as! NSLayoutConstraint.Attribute }
+    var to: UIView? { return self.params[toKey] as? UIView }
+    var toAttribute: NSLayoutConstraint.Attribute { return self.params[toAttrKey] as? NSLayoutConstraint.Attribute ?? .notAnAttribute }
+    var relation: NSLayoutConstraint.Relation { return self.params[relationKey] as? NSLayoutConstraint.Relation ?? .equal }
+    var multiplier: CGFloat { return self.params[multiplierKey] as? CGFloat ?? 1 }
+    var constant: CGFloat { return self.params[constantKey] as? CGFloat ?? 0 }
+    
     // ----------------------------------------------------------------------------------
     // MARK: initialization
     // ----------------------------------------------------------------------------------
@@ -53,39 +62,31 @@ public class UIBuilderConstraint {
     // MARK: Build Method
     // ----------------------------------------------------------------------------------
     
-    @discardableResult
-    public func build(update: Bool=false) -> NSLayoutConstraint {
-        // TODO: Check Values
-        
-        let parent = self.params[parentKey] as! UIView
-        let from = self.params[fromKey] as! UIView
-        let fromAttribute = self.params[fromAttrKey] as! NSLayoutConstraint.Attribute
-        let to = self.params[toKey] as? UIView
-        let toAttribute = self.params[toAttrKey] as? NSLayoutConstraint.Attribute ?? .notAnAttribute
-        let relation = self.params[relationKey] as? NSLayoutConstraint.Relation ?? .equal
-        let multiplier = self.params[multiplierKey] as? CGFloat ?? 1
-        let constant = self.params[constantKey] as? CGFloat ?? 0
-        
-        // Check for an existing constraint if update is true
-        var existingConstraint: NSLayoutConstraint?
-        if update == true {
-            for constraint in parent.constraints {
-                if constraint.firstItem === from && constraint.firstAttribute == fromAttribute &&
-                    constraint.secondItem === to && constraint.secondAttribute == toAttribute &&
-                    constraint.relation == relation && constraint.multiplier == multiplier {
-                    existingConstraint = constraint
-                    break
-                }
+    /**
+     See if a constraint already exists that matches the criteria
+     */
+    public func find() -> NSLayoutConstraint? {
+        for constraint in parent.constraints {
+            if constraint.firstItem === from && constraint.firstAttribute == fromAttribute &&
+                constraint.secondItem === to && constraint.secondAttribute == toAttribute &&
+                constraint.relation == relation && constraint.multiplier == multiplier {
+                return constraint
             }
         }
         
-        // If we have an existing constraint, update it, else create a new one
-        if let constraint = existingConstraint {
-            if constraint.constant != constant {
-                constraint.constant = constant
-                parent.layoutIfNeeded()
-            }
-            return constraint
+        return nil
+    }
+    
+    /**
+     Creates the constraint
+     */
+    @discardableResult
+    public func build(update: Bool=false) -> NSLayoutConstraint {
+
+        // If update is set, search for an existing one and update it.
+        // Else create a new one
+        if update, let constant = self.update(constant: constant) {
+            return constant
         }
         else {
             let constraint = NSLayoutConstraint(
@@ -95,6 +96,21 @@ public class UIBuilderConstraint {
             parent.addConstraint(constraint)
             return constraint
         }
+    }
+    
+    /**
+     Updates the constraint if it exists and returns it
+     */
+    @discardableResult
+    public func update(constant: CGFloat) -> NSLayoutConstraint? {
+        if let constraint = self.find() {
+            if constraint.constant != constant {
+                constraint.constant = constant
+                parent.layoutIfNeeded()
+            }
+            return constraint
+        }
+        return nil
     }
     
     // ----------------------------------------------------------------------------------
