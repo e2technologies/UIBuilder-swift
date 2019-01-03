@@ -11,7 +11,7 @@ public class UIBuilderConstraint {
     var params = [String:Any]()
     private var editingFrom = true
     
-    func setup(view: UIView) { view.translatesAutoresizingMaskIntoConstraints = false }
+    func clearTranslate(view: UIView?) { view?.translatesAutoresizingMaskIntoConstraints = false }
     
     let parentKey = "parent"
     let fromKey = "from"
@@ -21,6 +21,7 @@ public class UIBuilderConstraint {
     let multiplierKey = "multiplier"
     let relationKey = "relation"
     let constantKey = "constant"
+    let translateKey = "translate"
     
     var parent: UIView { return self.params[parentKey] as! UIView }
     var from: UIView { return self.params[fromKey] as! UIView }
@@ -30,13 +31,13 @@ public class UIBuilderConstraint {
     var relation: NSLayoutConstraint.Relation { return self.params[relationKey] as? NSLayoutConstraint.Relation ?? .equal }
     var multiplier: CGFloat { return self.params[multiplierKey] as? CGFloat ?? 1 }
     var constant: CGFloat { return self.params[constantKey] as? CGFloat ?? 0 }
+    var shouldTranslate: Bool { return self.params[translateKey] as? Bool ?? false }
     
     // ----------------------------------------------------------------------------------
     // MARK: initialization
     // ----------------------------------------------------------------------------------
     
     public init(_ parent: UIView) {
-        self.setup(view: parent)
         self.attr(parentKey, value: parent)
         self.attr(fromKey, value: parent)
     }
@@ -51,12 +52,13 @@ public class UIBuilderConstraint {
         return self
     }
     
-    public func from(_ from: UIView) -> Self { self.editingFrom = true; self.setup(view: from); return self.attr(fromKey, value: from) }
-    public func to(_ to: UIView) -> Self { self.editingFrom = false; self.setup(view: to); return self.attr(toKey, value: to) }
+    public func from(_ from: UIView) -> Self { self.editingFrom = true; return self.attr(fromKey, value: from) }
+    public func to(_ to: UIView) -> Self { self.editingFrom = false; return self.attr(toKey, value: to) }
     public func attribute(_ attribute: NSLayoutConstraint.Attribute) -> Self { return self.attr((self.editingFrom ? fromAttrKey : toAttrKey), value: attribute) }
     public func relation(_ relation: NSLayoutConstraint.Relation) -> Self { return self.attr(relationKey, value: relation) }
     public func multiplier(_ multiplier: CGFloat) -> Self { return self.attr(multiplierKey, value: multiplier) }
     public func constant(_ constant: CGFloat) -> Self { return self.attr(constantKey, value: constant) }
+    public func translate() -> Self { return self.attr(translateKey, value: true) }
 
     // ----------------------------------------------------------------------------------
     // MARK: Build Method
@@ -66,10 +68,10 @@ public class UIBuilderConstraint {
      See if a constraint already exists that matches the criteria
      */
     public func find() -> NSLayoutConstraint? {
-        for constraint in parent.constraints {
-            if constraint.firstItem === from && constraint.firstAttribute == fromAttribute &&
-                constraint.secondItem === to && constraint.secondAttribute == toAttribute &&
-                constraint.relation == relation && constraint.multiplier == multiplier {
+        for constraint in self.parent.constraints {
+            if constraint.firstItem === self.from && constraint.firstAttribute == self.fromAttribute &&
+                constraint.secondItem === self.to && constraint.secondAttribute == self.toAttribute &&
+                constraint.relation == self.relation && constraint.multiplier == self.multiplier {
                 return constraint
             }
         }
@@ -82,18 +84,25 @@ public class UIBuilderConstraint {
      */
     @discardableResult
     public func build(update: Bool=false) -> NSLayoutConstraint {
+        
+        // Setup the views translate properties
+        if !self.shouldTranslate {
+            self.clearTranslate(view: self.parent)
+            self.clearTranslate(view: self.from)
+            self.clearTranslate(view: self.to)
+        }
 
         // If update is set, search for an existing one and update it.
         // Else create a new one
-        if update, let constant = self.update(constant: constant) {
+        if update, let constant = self.update(constant: self.constant) {
             return constant
         }
         else {
             let constraint = NSLayoutConstraint(
-                item: from, attribute: fromAttribute, relatedBy: relation,
-                toItem: to, attribute: toAttribute,
-                multiplier: multiplier, constant: constant)
-            parent.addConstraint(constraint)
+                item: self.from, attribute: self.fromAttribute, relatedBy: self.relation,
+                toItem: self.to, attribute: self.toAttribute,
+                multiplier: self.multiplier, constant: self.constant)
+            self.parent.addConstraint(constraint)
             return constraint
         }
     }
@@ -106,7 +115,7 @@ public class UIBuilderConstraint {
         if let constraint = self.find() {
             if constraint.constant != constant {
                 constraint.constant = constant
-                parent.layoutIfNeeded()
+                self.parent.layoutIfNeeded()
             }
             return constraint
         }
