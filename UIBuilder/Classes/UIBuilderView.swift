@@ -1,10 +1,3 @@
-//
-//  UIBuilderView.swift
-//  UIBuilder
-//
-//  Created by Eric Chapman on 1/1/19.
-//
-
 import Foundation
 
 public class UIBuilderView: UIBuilderElement {

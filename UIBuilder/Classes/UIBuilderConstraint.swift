@@ -1,10 +1,3 @@
-//
-//  UIBuilderConstraint.swift
-//  UIBuilder
-//
-//  Created by Eric Chapman on 1/1/19.
-//
-
 import Foundation
 
 public class UIBuilderConstraint {
@@ -31,7 +24,7 @@ public class UIBuilderConstraint {
     var relation: NSLayoutConstraint.Relation { return self.params[relationKey] as? NSLayoutConstraint.Relation ?? .equal }
     var multiplier: CGFloat { return self.params[multiplierKey] as? CGFloat ?? 1 }
     var constant: CGFloat { return self.params[constantKey] as? CGFloat ?? 0 }
-    var shouldTranslate: Bool { return self.params[translateKey] as? Bool ?? false }
+    var allowTranslate: Bool { return self.params[translateKey] as? Bool ?? false }
     
     // ----------------------------------------------------------------------------------
     // MARK: initialization
@@ -58,7 +51,7 @@ public class UIBuilderConstraint {
     public func relation(_ relation: NSLayoutConstraint.Relation) -> Self { return self.attr(relationKey, value: relation) }
     public func multiplier(_ multiplier: CGFloat) -> Self { return self.attr(multiplierKey, value: multiplier) }
     public func constant(_ constant: CGFloat) -> Self { return self.attr(constantKey, value: constant) }
-    public func translate() -> Self { return self.attr(translateKey, value: true) }
+    public func translate(_ allow: Bool=true) -> Self { return self.attr(translateKey, value: allow) }
 
     // ----------------------------------------------------------------------------------
     // MARK: Build Method
@@ -86,7 +79,7 @@ public class UIBuilderConstraint {
     public func build(update: Bool=false) -> NSLayoutConstraint {
         
         // Setup the views translate properties
-        if !self.shouldTranslate {
+        if !self.allowTranslate {
             self.clearTranslate(view: self.parent)
             self.clearTranslate(view: self.from)
             self.clearTranslate(view: self.to)
@@ -127,46 +120,74 @@ public class UIBuilderConstraint {
     // ----------------------------------------------------------------------------------
     
     /** Creates a width constraint */
-    public func width(_ width: CGFloat) -> Self { return self.attribute(.width).constant(width) }
+    public func width(_ width: CGFloat) -> Self {
+        return self.attribute(.width).constant(width)
+    }
     
     /** Creates a height constraint */
-    public func height(_ height: CGFloat) -> Self { return self.attribute(.height).constant(height) }
+    public func height(_ height: CGFloat) -> Self {
+        return self.attribute(.height).constant(height)
+    }
     
     /** Locks the left edge of the view to the parents left edge */
-    public func leftEdges(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) -> Self { return self.attribute(useMargin ? .leftMargin : .left).to(view).attribute(.left).constant(-innerSpacing) }
+    public func leftEdges(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) -> Self {
+        return self.from(view).attribute(.left).to(self.parent).attribute(useMargin ? .leftMargin : .left).constant(innerSpacing)
+    }
     
     /** Locks the right edge of the view to the parents right edge */
-    public func rightEdges(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) -> Self { return self.attribute(useMargin ? .rightMargin : .right).to(view).attribute(.right).constant(innerSpacing) }
+    public func rightEdges(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) -> Self {
+        return self.from(view).attribute(.right).to(self.parent).attribute(useMargin ? .rightMargin : .right).constant(-innerSpacing)
+    }
     
     /** Locks the top edge of the view to the parents top edge */
-    public func topEdges(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) -> Self { return self.attribute(useMargin ? .topMargin : .top).to(view).attribute(.top).constant(-innerSpacing) }
+    public func topEdges(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) -> Self {
+        return self.from(view).attribute(.top).to(self.parent).attribute(useMargin ? .topMargin : .top).constant(innerSpacing)
+    }
     
     /** Locks the bottom edge of the view to the parents bottom edge */
-    public func bottomEdges(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) -> Self { return self.attribute(useMargin ? .bottomMargin : .bottom).to(view).attribute(.bottom).constant(innerSpacing) }
+    public func bottomEdges(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) -> Self {
+        return self.from(view).attribute(.bottom).to(self.parent).attribute(useMargin ? .bottomMargin : .bottom).constant(-innerSpacing)
+    }
     
     /** Locks the horizontal center to the parents horizontal center */
-    public func centerX(_ view: UIView, offset: CGFloat=0) -> Self { return self.attribute(.centerX).to(view).attribute(.centerX).constant(offset) }
+    public func centerX(_ view: UIView, offset: CGFloat=0) -> Self {
+        return self.from(view).attribute(.centerX).to(self.parent).attribute(.centerX).constant(offset)
+    }
     
     /** Locks the vertical center to the parents vertical center */
-    public func centerY(_ view: UIView, offset: CGFloat=0) -> Self { return self.attribute(.centerY).to(view).attribute(.centerY).constant(offset) }
+    public func centerY(_ view: UIView, offset: CGFloat=0) -> Self {
+        return self.from(view).attribute(.centerY).to(self.parent).attribute(.centerY).constant(offset)
+    }
     
     /** Locks the views left side to the horizontal center of the parent */
-    public func rightOfCenter(_ view: UIView, rightSpacing: CGFloat=0) -> Self { return self.attribute(.centerX).to(view).attribute(.left).constant(rightSpacing) }
+    public func rightOfCenter(_ view: UIView, rightSpacing: CGFloat=0) -> Self {
+        return self.from(view).attribute(.left).to(self.parent).attribute(.centerX).constant(rightSpacing)
+    }
     
     /** Locks the views right side to the horizontal center of the parent */
-    public func leftOfCenter(_ view: UIView, leftSpacing: CGFloat=0) -> Self { return self.attribute(.centerX).to(view).attribute(.right).constant(-leftSpacing) }
+    public func leftOfCenter(_ view: UIView, leftSpacing: CGFloat=0) -> Self {
+        return self.from(view).attribute(.right).to(self.parent).attribute(.centerX).constant(-leftSpacing)
+    }
     
     /** Locks the views bottom side to the vertical center of the parent */
-    public func aboveCenter(_ view: UIView, topSpacing: CGFloat=0) -> Self { return self.attribute(.centerY).to(view).attribute(.bottom).constant(-topSpacing) }
+    public func aboveCenter(_ view: UIView, topSpacing: CGFloat=0) -> Self {
+        return self.from(view).attribute(.bottom).to(self.parent).attribute(.centerY).constant(-topSpacing)
+    }
     
     /** Locks the views top side to the vertical center of the parent */
-    public func belowCenter(_ view: UIView, bottomSpacing: CGFloat=0) -> Self { return self.attribute(.centerY).to(view).attribute(.top).constant(bottomSpacing) }
+    public func belowCenter(_ view: UIView, bottomSpacing: CGFloat=0) -> Self {
+        return self.from(view).attribute(.top).to(self.parent).attribute(.centerY).constant(bottomSpacing)
+    }
     
     /** Locks the right side of the left view to the left side of the right view (side by side) */
-    public func leftRight(leftView: UIView, rightView: UIView, betweenSpacing: CGFloat=0) -> Self { return self.from(leftView).attribute(.right).to(rightView).attribute(.left).constant(-betweenSpacing) }
+    public func leftRight(leftView: UIView, rightView: UIView, betweenSpacing: CGFloat=0) -> Self {
+        return self.from(leftView).attribute(.right).to(rightView).attribute(.left).constant(-betweenSpacing)
+    }
     
     /** Locks the bottom of the top view to the top of the bottom view (above/below) */
-    public func topBottom(topView: UIView, bottomView: UIView, betweenSpacing: CGFloat=0) -> Self { return self.from(topView).attribute(.bottom).to(bottomView).attribute(.top).constant(-betweenSpacing) }
+    public func topBottom(topView: UIView, bottomView: UIView, betweenSpacing: CGFloat=0) -> Self {
+        return self.from(topView).attribute(.bottom).to(bottomView).attribute(.top).constant(-betweenSpacing)
+    }
 }
 
 public extension UIView {
@@ -210,10 +231,13 @@ public extension UIView {
      - Parameter view: The view to center
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainLeftCenter(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.leftEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.centerY(view).build()
+    func constrainLeftCenter(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).leftEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).centerY(view).build()
     }
     
     /**
@@ -223,10 +247,13 @@ public extension UIView {
      - Parameter view: The view to center
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainRightCenter(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.rightEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.centerY(view).build()
+    func constrainRightCenter(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).rightEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).centerY(view).build()
     }
     
     /**
@@ -236,10 +263,13 @@ public extension UIView {
      - Parameter view: The view to center
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainTopCenter(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.topEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.centerX(view).build()
+    func constrainTopCenter(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).topEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).centerX(view).build()
     }
     
     /**
@@ -249,10 +279,13 @@ public extension UIView {
      - Parameter view: The view to center
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainBottomCenter(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.bottomEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.centerX(view).build()
+    func constrainBottomCenter(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).bottomEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).centerX(view).build()
     }
     
     /**
@@ -262,10 +295,13 @@ public extension UIView {
      - Parameter view: The view to place
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainTopLeft(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.leftEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.topEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+    func constrainTopLeft(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).leftEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).topEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
     }
     
     /**
@@ -275,10 +311,13 @@ public extension UIView {
      - Parameter view: The view to place
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainTopRight(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.rightEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.topEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+    func constrainTopRight(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).rightEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).topEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
     }
     
     /**
@@ -288,10 +327,13 @@ public extension UIView {
      - Parameter view: The view to place
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainBottomLeft(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.leftEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.bottomEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+    func constrainBottomLeft(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).leftEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).bottomEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
     }
     
     /**
@@ -301,10 +343,13 @@ public extension UIView {
      - Parameter view: The view to place
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainBottomRight(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.rightEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.bottomEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+    func constrainBottomRight(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).rightEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).bottomEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
     }
     
     /**
@@ -313,11 +358,14 @@ public extension UIView {
      - Parameter view: The view to constrain inside
      - Parameter innerSpacing: The distance between the outer view and the inner view (default: 0)
      - Parameter useMargin: Boolean specifying if they should lock to the margin
+     - Parameter allowTranslate: Some standard iOS views (such as the contentView in a UITableViewCell)
+                 need to have the "translatesAutoresizingMaskIntoConstraints" set to "true".  Setting
+                 this flag will skip clearing this which is the default behavior
      */
-    func constrainInside(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true) {
-        self.constrain.topEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.bottomEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.leftEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
-        self.constrain.rightEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+    func constrainInside(_ view: UIView, innerSpacing: CGFloat=0, useMargin: Bool=true, allowTranslate: Bool=false) {
+        self.constrain.translate(allowTranslate).topEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).bottomEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).leftEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
+        self.constrain.translate(allowTranslate).rightEdges(view, innerSpacing: innerSpacing, useMargin: useMargin).build()
     }
 }

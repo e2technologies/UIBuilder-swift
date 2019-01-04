@@ -1,10 +1,3 @@
-//
-//  UIBuilderStack.swift
-//  UIBuilder
-//
-//  Created by Eric Chapman on 1/2/19.
-//
-
 import Foundation
 
 enum UIBuilderStackMode {
@@ -15,7 +8,7 @@ enum UIBuilderStackMode {
 /**
  This class will translate the insets parameters between horizontal and vertical
  */
-class UIEdgeInsetsTranslate {
+private class UIEdgeInsetsTranslate {
     let insets: UIEdgeInsets
     let mode: UIBuilderStackMode
     
@@ -33,7 +26,7 @@ class UIEdgeInsetsTranslate {
 /**
  This class will translate the element parameters between horizontal and vertical
  */
-class UIBuilderElementTranslate {
+private class UIBuilderElementTranslate {
     let element: UIBuilderElement
     let mode: UIBuilderStackMode
     let padding: UIEdgeInsetsTranslate
@@ -74,12 +67,9 @@ class UIBuilderElementTranslate {
         }
         else {
             switch self.element.horizontalAlign {
-            case .left:
-                return .top
-            case .center:
-                return .center
-            case .right:
-                return .bottom
+            case .left: return .top
+            case .center: return .center
+            case .right: return .bottom
             }
         }
     }
@@ -90,12 +80,9 @@ class UIBuilderElementTranslate {
         }
         else {
             switch self.element.verticalAlign {
-            case .top:
-                return .left
-            case .center:
-                return .center
-            case .bottom:
-                return .right
+            case .top: return .left
+            case .center: return .center
+            case .bottom: return .right
             }
         }
     }
@@ -105,7 +92,7 @@ class UIBuilderElementTranslate {
  This class will translate some of the constraint builders between horizontal and vertical
  */
 
-class UIBuilderConstraintTranslate {
+private class UIBuilderConstraintTranslate {
     let view: UIView
     let mode: UIBuilderStackMode
     
